@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, send_file
-from scrapper import get_jobs
-from save import save_to_file
+from scrapper import get_jobs as get_stackoverflow
+from save import save_to_file, save_to_jobskorea
+from jobkorea import get_jobs as get_jobkorea
+
 app = Flask("SuperScrapper")
 
 db = {}
@@ -20,11 +22,11 @@ def report():
         if existingJobs:
             jobs = existingJobs
         else:
-            jobs = get_jobs(word)
+            jobs = get_jobkorea(word)
             db[word] = jobs
     else:
         return redirect('/')
-    return render_template("report.html",
+    return render_template("report1.html",
                            searchingBy=word,
                            resultsNumber=len(jobs),
                            jobs=jobs)
@@ -40,8 +42,8 @@ def export():
         jobs = db.get(word)
         if not jobs:
             raise Exception()
-        save_to_file(jobs)
-        return send_file("jobs.csv")
+        save_to_jobskorea(jobs)
+        return send_file("jobskorea.csv")
     except:
         return redirect('/')
 
