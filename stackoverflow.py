@@ -12,12 +12,13 @@ def get_last_page():
         s.append(link.find('span'))
     else:
         last_page = s[(-1)].get_text(strip=True)
-        return int(last_page)
+    print(last_page)
+    return int(last_page)
 
 
 def extract_job(html):
-    title = html.find('a')['title']
-    company, location = html.find('h3').find_all('span')
+    title = html.find('h2').find("a")['title']
+    company, location = html.find('h3').find_all('span', recursive=False)
     company = company.get_text(strip=True)
     location = location.get_text(strip=True)
     job_id = html.find('a', {'class': 's-link'})['href']
@@ -29,13 +30,14 @@ def extract_jobs(last_pages):
     jobs = []
     for page in range(last_pages):
         print(f"Scrapping page {page}")
-        result = requests.get(f"{URL}")
+        result = requests.get(f"{URL}&pg={page+1}")
         soup = BeautifulSoup(result.text, 'html.parser')
         results = soup.find_all('div', {'class': 'grid--cell fl1'})
+        # print(results)
         for result in results:
             jobs.append(extract_job(result))
-        else:
-            return jobs
+
+    return jobs
 
 
 def get_jobs():
