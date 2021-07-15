@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+
+      section{
+        display: grid;
+        gap : 10px;
+        grid-template-columns: repeat(6, 1fr);
+      }
+      
+    </style>
+  </head>
+  <body>
+    <h1>Search Results</h1>
+    <h3>Found {{resultsNumber}} results for : {{searchingBy}}</h3>
+    <a href = "/commit?word={{searchingBy}}">Export to CSV</a>
+    <section>
+      <h4>Index</h4>
+      <h4>Company</h4>
+      <h4>Spec</h4>
+      <h4>Location</h4>
+      <h4>Content</h4>
+      <h4>Link</h4>
+      {%for job in jobs%}
+        <span>{{job.num}}</span>
+        <span>{{job.company}}</span>
+        <span>{{job.spec}}</span>
+        <span>{{job.location}}</span>
+        <span>{{job.content}}</span>
+        <a href = "{{job.link}}" target="_blank">Apply</a>
+      {% endfor%}
+      <section>
+  </body>
+</html>
