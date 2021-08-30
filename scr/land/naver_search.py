@@ -23,9 +23,10 @@ driver = webdriver.Chrome(
     executable_path="D:/파이썬 공부/web/Python-update/scr/land/chromedriver.exe")
 driver.implicitly_wait(20)
 driver.get(URL)
-# print(driver.window_handles)
 
 URL = driver.current_url
+
+# 크롤링 한 화면을 클릭해서 크롤링하는거
 
 
 def click_nolink_for_scrollDown(driver):
@@ -44,15 +45,17 @@ def click_nolink_for_scrollDown(driver):
         time.sleep(0.2)
         driver.find_element_by_css_selector("body").send_keys(Keys.PAGE_DOWN)
 
+# 파일을 csv 파일에 저장
+
 
 def save_to_place(name, place):
     f = open(name, 'w+', newline='',  encoding='utf-8-sig')
     writer = csv.writer(f)
-    # writer.writerow(['번호', '매물명', '동', '거래유형', '가격', '유형', '전체면적', '실제면적',
-    #                  '높이', '방향', '설명', '제공', '확인날짜', '확인', '건물특징', '링크'])
     for i in place:
         writer.writerow(list(i.values()))
     return
+
+# 이름명이 동일한 csv 파일명을 바꾸어주는 메서드
 
 
 def check(file_name):
@@ -69,25 +72,20 @@ def check(file_name):
 
 ht = driver.page_source
 so = bs(ht, 'html.parser')
-
+# body라는 것을 find_element_by_css_selector로 찾고나서 ul을 한 번 눌려준다
 try:
     body = driver.find_element_by_css_selector("body")
     time.sleep(0.3)
     driver.find_element_by_css_selector(
         '#_list_scroll_container > div > div > div:nth-child(2) > ul').click()
-
-    for i in range(500):
+#
+    for i in range(500):  # 첫페이지의 길이만큼이나 안에 있는 숫자를 늘려주고 줄여줄 수 있다.
         time.sleep(0.2)
         body.send_keys(Keys.PAGE_DOWN)
 except:
     driver.refresh()
     time.sleep(1)
 
-    # imageurl.ap
-
-# ht = driver.page_source
-# soup_all = bs(ht, 'html.parser')
-# all = soup_all.find_all('li', {'class':  '_3t81n'})
 plus = check(plus)
 while True:
     opentime.clear()
@@ -97,6 +95,7 @@ while True:
     visit = ""
     imageurl = ""
     try:
+        # 첫페이지때 이미지를 imageurl라는 변수에 저장
         image = driver.find_element_by_xpath(
             f'//*[@id="_list_scroll_container"]/div/div/div[2]/ul/li[{num}]/div[2]/div/a[1]/span/div')
         # //*[@id="_list_scroll_container"]/div/div/div[2]/ul/li[1]/div[2]/div/a[1]/span/div
@@ -104,11 +103,7 @@ while True:
         found = im.find('(')
         imageurl = im[found+2::][:-3]
 
-        # //*[@id="_list_scroll_container"]/div/div/div[2]/ul/li[2]/div[2]/div/a[1]
-# //*[@id="_list_scroll_container"]/div/div/div[2]/ul/li[3]/div[2]/div/a[1]
-        # _list_scroll_container > div > div > div:nth-child(2) > ul > li:nth-child(2) > div.QwCbc > div > a:nth-child(1)
-        # _list_scroll_container > div > div > div:nth-child(2) > ul > li:nth-child(1) > div.QwCbc > div > a:nth-child(1)
-        # _list_scroll_container > div > div > div:nth-child(2) > ul > li:nth-child(3) > div.QwCbc > div > a:nth-child(1)
+        # find_element_by_xpath로 위치를 찾아서 클릭을 해준다
         driver.find_element_by_xpath(
             f'//*[@id="_list_scroll_container"]/div/div/div[2]/ul/li[{num}]/div[1]/a[1]').send_keys(Keys.CONTROL + "\n")
         # driver.find_element_by_css_selector(
@@ -116,6 +111,7 @@ while True:
         stop = 0
         count += 1
     except:
+        # 찾지를 못하면 stop의 숫자를 늘려주고 5가 되면 break문을 걸어서 종료
         driver.execute_script('window.scrollTo(0, 400);')
         stop += 1
         print(stop)
@@ -123,14 +119,14 @@ while True:
             break
         continue
 
-# body = driver.find_element_by_css_selector("#_list_scroll_container > div")
+    # 열어준 탭이동을 합니다
 
     driver.switch_to_window(driver.window_handles[-1])
 
     time.sleep(1)
 
     click_nolink_for_scrollDown(driver)
-
+    # 페이지를 클릭하여서 새로운 정보를 크롤링을 한다
     time.sleep(0.1)
     html = driver.page_source
     soup = bs(html, 'html.parser')
@@ -185,11 +181,14 @@ while True:
             opentime.append(etc)
 
         tt = ",".join(opentime)
+        # place를 리스트에 딕셔너리 형태로 저장을 시킨다
     place.append({"num": num,  "name": name, "info": info, "score": score, "visit": visit, "blog": blog,
                   "location": location, "subway_location": subway_location, "clock":  tt, "imageurl": imageurl})
     print(f'{count} : {name}')
     save_to_place(plus, place)
+    # driver를 종료하고 전에있던 탭을 켜줍니다.
     driver.close()
+
     driver.switch_to_window(driver.window_handles[0])
 
 
