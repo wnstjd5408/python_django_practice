@@ -6,7 +6,7 @@ import csv
 import os
 import sys
 import re
-
+import datetime
 URL = "https://m.place.naver.com/restaurant/list?x=129.1023126&y=35.1385167&query="
 plus = input("장소를 입력하시오 : ")
 
@@ -35,15 +35,16 @@ def click_nolink_for_scrollDown(driver):
             plus = driver.find_element_by_css_selector(
                 "#app-root > div > div > div.place_detail_wrapper > div.place_fixed_maintab > div > div > div > div > a:nth-child(1)")
             plus.click()
+            time.sleep(0.1)
+            for i in range(10):
+                time.sleep(0.2)
+                driver.find_element_by_css_selector(
+                    "body").send_keys(Keys.PAGE_DOWN)
             break
         except:
-            driver.refresh()
-            time.sleep(1)
+            driver.close()
+            break
 
-    time.sleep(0.1)
-    for i in range(10):
-        time.sleep(0.2)
-        driver.find_element_by_css_selector("body").send_keys(Keys.PAGE_DOWN)
 
 # 파일을 csv 파일에 저장
 
@@ -115,7 +116,7 @@ while True:
         driver.execute_script('window.scrollTo(0, 400);')
         stop += 1
         print(stop)
-        if(stop == 5):
+        if stop == 5:
             break
         continue
 
@@ -126,7 +127,10 @@ while True:
     time.sleep(1)
 
     click_nolink_for_scrollDown(driver)
-    # 페이지를 클릭하여서 새로운 정보를 크롤링을 한다
+    print("창의 개수 : ", len(driver.window_handles))
+    if(len(driver.window_handles) == 1):
+        count -= 1
+        continue
     time.sleep(0.1)
     html = driver.page_source
     soup = bs(html, 'html.parser')
@@ -167,9 +171,8 @@ while True:
         subway_location = subway_location.text
     except:
         subway_location = None
-    print(subway_location)
     t = data[1].find_all('div', {'class': '_2ZP3j'})
-    if(len(t) == 1):
+    if len(t) == 1:
         tt = t[0].text
     else:
         for i in t:
@@ -182,8 +185,10 @@ while True:
 
         tt = ",".join(opentime)
         # place를 리스트에 딕셔너리 형태로 저장을 시킨다
+    now = datetime.datetime.now()
+    nowDate = now.strftime('%Y-%m-%d')
     place.append({"num": num,  "name": name, "info": info, "score": score, "visit": visit, "blog": blog,
-                  "location": location, "subway_location": subway_location, "clock":  tt, "imageurl": imageurl})
+                  "location": location, "subway_location": subway_location, "clock":  tt, "imageurl": imageurl, "nowDate": nowDate})
     print(f'{count} : {name}')
     save_to_place(plus, place)
     # driver를 종료하고 전에있던 탭을 켜줍니다.
