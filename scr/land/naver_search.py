@@ -15,7 +15,6 @@ URL = URL + plus
 subway_location = ""
 opentime = []
 place = []
-imageurl = []
 num = 0
 stop = 0
 count = 0
@@ -80,7 +79,7 @@ try:
     driver.find_element_by_css_selector(
         '#_list_scroll_container > div > div > div:nth-child(2) > ul').click()
 #
-    for i in range(500):  # 첫페이지의 길이만큼이나 안에 있는 숫자를 늘려주고 줄여줄 수 있다.
+    for i in range(1000):  # 첫페이지의 길이만큼이나 안에 있는 숫자를 늘려주고 줄여줄 수 있다.
         time.sleep(0.2)
         body.send_keys(Keys.PAGE_DOWN)
 except:
@@ -94,16 +93,7 @@ while True:
     score = ""
     blog = ""
     visit = ""
-    imageurl = ""
     try:
-        # 첫페이지때 이미지를 imageurl라는 변수에 저장
-        image = driver.find_element_by_xpath(
-            f'//*[@id="_list_scroll_container"]/div/div/div[2]/ul/li[{num}]/div[2]/div/a[1]/span/div')
-        # //*[@id="_list_scroll_container"]/div/div/div[2]/ul/li[1]/div[2]/div/a[1]/span/div
-        im = image.get_attribute('style')
-        found = im.find('(')
-        imageurl = im[found+2::][:-3]
-
         # find_element_by_xpath로 위치를 찾아서 클릭을 해준다
         driver.find_element_by_xpath(
             f'//*[@id="_list_scroll_container"]/div/div/div[2]/ul/li[{num}]/div[1]/a[1]').send_keys(Keys.CONTROL + "\n")
@@ -113,9 +103,10 @@ while True:
         count += 1
     except:
         # 찾지를 못하면 stop의 숫자를 늘려주고 5가 되면 break문을 걸어서 종료
+        print("No search listclick")
         driver.execute_script('window.scrollTo(0, 400);')
         stop += 1
-        print(stop)
+        print('멈추는 횟수 : ', stop)
         if stop == 5:
             break
         continue
@@ -129,11 +120,20 @@ while True:
     click_nolink_for_scrollDown(driver)
     print("창의 개수 : ", len(driver.window_handles))
     if(len(driver.window_handles) == 1):
+        driver.close()
+        driver.switch_to_window(driver.window_handles[0])
         count -= 1
         continue
     time.sleep(0.1)
     html = driver.page_source
     soup = bs(html, 'html.parser')
+    # image = soup.find('div', {'class': '_1ZDCY'})
+    im = soup.find('div', {'class': 'cb7hz'})['style']
+    found = im.find('(')
+    imagefirst = im[found+1::]
+    backfound = imagefirst.find(')')
+    imageurl = imagefirst[0: backfound]
+    # 이미지 검색
     name = soup.find('span', {'class': '_3XamX'}).text
     info = soup.find('span', {'class':  '_3ocDE'}).text
     avg = soup.find('div', {'class': '_1kUrA'})
@@ -195,6 +195,5 @@ while True:
     driver.close()
 
     driver.switch_to_window(driver.window_handles[0])
-
 
 driver.quit()
